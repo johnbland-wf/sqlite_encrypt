@@ -17,6 +17,7 @@ const NSString *databaseName = @"encrypted.sqlite3";
 NSString *databaseDirectory;
 NSString *databasePath;
 sqlite3 *db;
+int totalRows = 10000;
 
 - (void)viewDidLoad {
     NSError *error;
@@ -43,9 +44,7 @@ sqlite3 *db;
             // password is correct, or, database has been initialized
             NSLog(@"password worked");
 
-            [self countRows];
-
-//            [self setupSchema];
+            [self setupSchema];
         } else {
             NSLog(@"password failed");
         }
@@ -61,45 +60,51 @@ sqlite3 *db;
     if (sqlite3_exec(db, (const char*) [query UTF8String], NULL, NULL, NULL) == SQLITE_OK) {
         NSLog(@"SCHEMA end");
 
+        if ([self countRows] > 0) {
+            [self deleteRows];
+        }
+
         [self insertRows];
     } else {
         NSLog(@"SCHEMA failed");
     }
 }
 
-- (void)countRows{
-    NSLog(@"COUNT begin");
+- (int)countRows{
+    int result = 0;
 
     const char *sql = "SELECT count(*) FROM TestData";
     sqlite3_stmt *selectStatement;
+
+    NSLog(@"COUNT begin");
     if (sqlite3_prepare_v2(db, sql, -1, &selectStatement, NULL) == SQLITE_OK) {
         if (sqlite3_step(selectStatement) == SQLITE_ROW) {
             NSString *count = [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(selectStatement, 0)];
             NSLog(@"RECORDS: %@", count);
+
+            result = [count integerValue];
         }else{
             NSLog(@"Not found");
         }
         sqlite3_reset(selectStatement);
     }
+
+    return result;
 }
 
 - (void)insertRows{
-    NSLog(@"INSERT: Begin");
-
-    if (sqlite3_exec(db, (const char*) "DELETE FROM TestData;", NULL, NULL, NULL) != SQLITE_OK) {
-
-    }
+    NSLog(@"INSERT: Begin for %d", totalRows);
 
     NSNumber *rowId;
 
     NSString *insertSQL;
 
-    for (int i=0; i < 1000000; i++) {
+    for (int i=0; i < totalRows; i++) {
         rowId = [NSNumber numberWithInt:(i + 1)];
         insertSQL = [self createInsertStatement:rowId values:[self randomFieldValues]];
 
         if (sqlite3_exec(db, (const char*) [insertSQL UTF8String], NULL, NULL, NULL) != SQLITE_OK) {
-            NSLog(@"INSERT failed");
+            NSLog(@"INSERT: failed");
         }
     }
 
@@ -113,15 +118,18 @@ sqlite3 *db;
     return [query stringByReplacingOccurrencesOfString:@"{0}" withString:[rowID stringValue]];
 }
 
-- (void)decryptDatabase{
-    NSLog(@"Decrypting Database");
+- (void)deleteRows{
+    NSLog(@"DELETE: Begin");
+    if (sqlite3_exec(db, (const char*) "DELETE FROM TestData;", NULL, NULL, NULL) != SQLITE_OK) {
+        NSLog(@"DELETE: failed");
+    }
+    NSLog(@"DELETE: End");
 }
 
 - (void)deleteDatabase{
     NSLog(@"Deleting Database");
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
-    BOOL exists = [fileManager fileExistsAtPath:databasePath];
     if ([fileManager fileExistsAtPath:databasePath]) {
         // delete the old sqlite DB
         NSLog(@"Deleting previous SQLite database at %@", databasePath);
