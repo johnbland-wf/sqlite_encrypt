@@ -69,12 +69,17 @@ sqlite3 *db;
 
 - (void)countRows{
     NSLog(@"COUNT begin");
-    if (sqlite3_exec(db, (const char*) "SELECT count(*) FROM TestData", NULL, NULL, NULL) == SQLITE_OK) {
-        NSLog(@"COUNT end");
 
-        [self insertRows];
-    } else {
-        NSLog(@"COUNT failed");
+    const char *sql = "SELECT count(*) FROM TestData";
+    sqlite3_stmt *selectStatement;
+    if (sqlite3_prepare_v2(db, sql, -1, &selectStatement, NULL) == SQLITE_OK) {
+        if (sqlite3_step(selectStatement) == SQLITE_ROW) {
+            NSString *count = [[NSString alloc] initWithUTF8String:(const char *) sqlite3_column_text(selectStatement, 0)];
+            NSLog(@"RECORDS: %@", count);
+        }else{
+            NSLog(@"Not found");
+        }
+        sqlite3_reset(selectStatement);
     }
 }
 

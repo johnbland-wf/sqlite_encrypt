@@ -1,0 +1,25 @@
+PODS:
+  - cdebug (0.1.1)
+  - KeychainItemWrapper (1.2)
+  - SQLCipher (2.1.1)
+  - sqlite3 (3.8.1):
+    - sqlite3/common
+  - sqlite3-objc (0.2):
+    - cdebug
+  - sqlite3/common (3.8.1)
+
+DEPENDENCIES:
+  - KeychainItemWrapper (= 1.2)
+  - SQLCipher (= 2.1.1)
+  - SQLCipher (~> 3.0.1)
+  - sqlite3 (~> 3.8.1)
+  - sqlite3-objc (~> 0.2)
+
+SPEC CHECKSUMS:
+  cdebug: 8c2ca6363107205eaf777295736c0ec12ba490bd
+  KeychainItemWrapper: b532e85de8792ea70dad237e7ead90993af763cf
+  SQLCipher: 3f8f8e691af8ce3770ae10d83b80b46b9f589c44
+  sqlite3: 8f9eb8cd73df9e4dee11c91bfc0e2abee1d9d1d9
+  sqlite3-objc: d76f36e2b9f4d337b17dc300168cb4a936bd34d7
+
+COCOAPODS: 0.29.0
